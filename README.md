@@ -1,7 +1,3 @@
-## Films_scraper
-A web scraping project to get movies in theaters from the Cinemark website in Brazil.
-##
-
 ### About
 The main goal of this project is to get a an Excel csv file containing all movies in
 theaters from the [Cinemark](https://www.cinemark.com.br/) website in Brazil.
