@@ -11,12 +11,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from time import sleep
 
-#Choose the city one wants to see the movies in theaters
+#Choose the city to see the movies in theaters
+#Coomon cities are São Paulo, Belo Horizonte, Rio de Janeiro, Brasilia, Porto Alegre etc.
 
 city = input('What city do you live: ').replace(" ", "-").lower()
 city
-
-#Getting the url for the city and run the bot.
 
 url = 'https://www.cinemark.com.br/'+str(city)+'/filmes/em-cartaz?pagina=1'
 
@@ -24,40 +23,23 @@ driver = webdriver.Chrome('C:/Users/leeon/.spyder-py3/chromedriver.exe')
 driver.get(url)
 
 sleep(3)
-#Getting the page source from the driver a for the city and run the bot.
-'''
-page_source = driver.page_source
-soup = BeautifulSoup(page_source, 'lxml')
 
-in_page = soup.find_all('h3', class_="movie-title")
-'''
-#Getting the number of movies in the page
-'''
-elements = []
-
-for element in in_page:
-    for i in element.find_all('a'):
-        elements.append(i)
-
-n_in_page = len(elements)
-n_in_page
-'''
-
+#Defining the variables and the dataframe
 movies = []
 summaries = []
 ratings = []
-#To make the bot get all movies in the page and the variables (movies, rates, link)
 
 df = pd.DataFrame()
 
 while True:
-
+    
+    #Getting the page source from the driver a for the city and run the bot.
     page_source = driver.page_source
     soup = BeautifulSoup(page_source, 'lxml')
-
+    
+    #Getting the number of movies in the page
     in_page = soup.find_all('h3', class_="movie-title")
     in_page
-    #Getting the number of movies in the page
 
     elements = []
 
@@ -78,21 +60,18 @@ while True:
         for rating in i.find_all('span', class_="rating-abbr"):
             ratings.append(rating.string)
 
-
     summary_link = [driver.find_element(By.XPATH, '//*[@id="content"]/div/div/div/div/div['+str(i)+']/article/div/div/ul/li/a').get_attribute('href') for i in range(1,n_in_page)]
     for i in summary_link:
         summary = str(i)
         summaries.append(summary)
-
+        
+    # Getting the movies from the next page if available
     try:
         next_page = soup.find('a', class_="pagination-next").get('href')
         driver.get(next_page)
     except:
         break
 
-movies
-summaries
-ratings
-
+#Saving the data to the csv file
 df = pd.DataFrame({'Movie': movies, 'Rates': ratings, 'Book': summaries})
 df.to_csv("C:/Users/leeon/Desktop/file.csv",index=False, encoding="ANSI")
