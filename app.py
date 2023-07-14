@@ -5,22 +5,46 @@ Created on Mon Jul 10 20:44:35 2023
 @author: leeon
 """
 
-import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from time import sleep
+import pandas as pd
 
-#Choose the city to see the movies in theaters
-#Coomon cities are São Paulo, Belo Horizonte, Rio de Janeiro, Brasilia, Porto Alegre etc.
+#Email modules
+import email.mime.multipart
+import email.mime.text
+import smtplib
+import email
+import email.mime.application
 
-city = input('What city do you live: ').replace(" ", "-").lower()
-city
 
-url = 'https://www.cinemark.com.br/'+str(city)+'/filmes/em-cartaz?pagina=1'
+url = 'https://www.cinemark.com.br/'
 
 driver = webdriver.Chrome('C:/Users/leeon/.spyder-py3/chromedriver.exe')
 driver.get(url)
+
+#Locations where Cinemark is available and city input
+
+def location():
+    page_source = driver.page_source
+    soup = BeautifulSoup(page_source, 'lxml')
+
+    locations = []
+    location_path = soup.find('div', id="citysDesktop")
+    for cities in location_path:
+        cities.find_all('a')
+        locations.append(cities.string)
+    return locations
+
+
+print("Locations where Cinemark is available:", ", ".join(location()))
+
+city = input('What city do you live: ').replace(" ", "-").lower()
+
+city_url = 'https://www.cinemark.com.br/'+str(city)+'/filmes/em-cartaz?pagina=1'
+
+driver.get(city_url)
 
 sleep(3)
 
@@ -30,6 +54,8 @@ summaries = []
 ratings = []
 
 df = pd.DataFrame()
+
+#Executing the code:
 
 while True:
     
@@ -73,5 +99,9 @@ while True:
         break
 
 #Saving the data to the csv file
-df = pd.DataFrame({'Movie': movies, 'Rates': ratings, 'Book': summaries})
-df.to_csv("C:/Users/leeon/Desktop/file.csv",index=False, encoding="ANSI")
+
+try:
+    df = pd.DataFrame({'Movie': movies, 'Rates': ratings, 'Book': summaries})
+    df.to_csv("C:/Users/leeon/Desktop/file.csv",index=False, encoding="ANSI")
+except:
+    print('Something wrong...')
